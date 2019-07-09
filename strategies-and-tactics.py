@@ -7,11 +7,8 @@ or adjusting strategies for your tests.
 
 Key link:  https://hypothesis.readthedocs.io/en/latest/data.html
 """
-
 import json
-
 import pytest
-
 import hypothesis
 from hypothesis import given, settings, strategies as st
 
@@ -21,15 +18,13 @@ from hypothesis import given, settings, strategies as st
 
 # Remove the mark.xfail decorator,
 # then improve the filter function to make the test pass.
-@pytest.mark.xfail
-@given(st.integers().filter(lambda x: True))
+@given(st.integers().filter(lambda x: x % 2 == 0))
 def test_filter_even_numbers(x):
     # If we convert any even integer to a string, the last digit will be even.
     assert str(x)[-1] in "02468"
 
 
-@pytest.mark.xfail
-@given(st.integers())
+@given(st.integers().filter(lambda x: x % 2 == 1))
 def test_filter_odd_numbers(x):
     # If we convert any odd integer to a string, the last digit will be odd.
     assert str(x)[-1] in "13579"
@@ -54,17 +49,15 @@ def test_filter_odd_numbers(x):
 # You'll need to change the value of the integer, then convert it to a string.
 
 
-@pytest.mark.xfail
-@given(st.integers())
+@given(st.integers().map(lambda x: x * 2))
 def test_map_even_numbers(x):
     # Check that last character of string x is a substring of "02468"
-    assert x[-1] in "02468"
+    assert str(x)[-1] in "02468"
 
 
-@pytest.mark.xfail
-@given(st.integers())
+@given(st.integers().map(lambda x: x * 2 + 1))
 def test_map_odd_numbers(x):
-    assert x[-1] in "13579"
+    assert str(x)[-1] in "13579"
 
 
 # Takeaway
@@ -105,6 +98,8 @@ json_strat = st.deferred(
     lambda: st.one_of(
         st.none(),
         st.booleans(),
+        st.integers(),
+        st.floats(),
         # TODO: Write out the rest of this definition in Hypothesis strategies!
     )
 )
@@ -159,10 +154,8 @@ def a_composite_strategy(draw):
        >>> a_composite_strategy().example()
        ([-1, -2, -3, 4], 3)
     """
-    # TODO: draw a list, determine the allowed indices, and choose one to return
-    lst = []  # TODO: draw a list of integers here
-    index = None
-    # TODO: determine the list of allowed indices, and choose one if non-empty
+    lst = draw(st.lists(st.integers(min_value=1), min_size=1, max_size=100))
+    index = draw(st.integers(0, len(lst) - 1))
     return (lst, index)
 
 
