@@ -1,2 +1,4 @@
 hypothesis>=4.0.0
 pytest
+numpy
+pandas
